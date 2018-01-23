@@ -1,0 +1,37 @@
+<?xml version= "1.0" encoding= "UTF-8"?>
+<beans:beans xmlns:beans= "http://www.springframework.org/schema/beans"
+             xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+             xmlns= "http://www.springframework.org/schema/security"
+             xsi:schemaLocation= "http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+
+    <http auto-config="true" use-expressions="true">
+        <intercept-url pattern="/login*" access="permitAll" />
+        <intercept-url pattern="/admin*" access="hasRole('ROLE_ADMIN')" />
+
+        <form-login login-page="/login" default-target-url="/admin"
+                    authentication-failure-url="/loginError" />
+        <logout logout-success-url="/login" logout-url="/j_spring_security_logout" />
+        <csrf disabled="true" />
+    </http>
+
+    <authentication-manager>
+        <authentication-provider>
+            <jdbc-user-service data-source-ref="dataSource"
+                               users-by-username-query="select login as username, password, enabled from contacts where login = ?"
+                               authorities-by-username-query="select c.login, ur.authority from contacts c, users_roles ur where c.id = ur.user_id and c.login = ? " />
+        </authentication-provider>
+    </authentication-manager>
+
+    <beans:bean id="dataSource"
+                class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <beans:property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <beans:property name="url" value="jdbc:mysql://localhost:3306/People" />
+        <beans:property name="username" value="root" />
+        <beans:property name="password" value="" />
+    </beans:bean>
+
+
+</beans:beans>
